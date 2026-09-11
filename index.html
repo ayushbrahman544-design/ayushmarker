@@ -1,1 +1,1782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Ayush Tripathi — Digital Experience</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#050505;
+  --white:#f4f4f4;
+  --muted:#8c8c8c;
+  --line:rgba(255,255,255,.12);
+  --glass:rgba(255,255,255,.06);
+  --accent:#b9d7ff;
+  --accent2:#7da7ff;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:auto;
+}
+
+body{
+  background:var(--bg);
+  color:var(--white);
+  font-family:Inter,Arial,sans-serif;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button{
+  font:inherit;
+}
+
+#webgl{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:-5;
+  pointer-events:none;
+}
+
+.noise{
+  position:fixed;
+  inset:0;
+  z-index:10;
+  pointer-events:none;
+  opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
+}
+
+.cursor{
+  position:fixed;
+  width:18px;
+  height:18px;
+  border:1px solid white;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  z-index:999;
+  mix-blend-mode:difference;
+  transition:
+    width .3s ease,
+    height .3s ease,
+    background .3s ease;
+}
+
+.cursor.active{
+  width:70px;
+  height:70px;
+  background:#fff;
+  border-color:#fff;
+}
+
+.cursor-text{
+  position:fixed;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  z-index:1000;
+  font-size:9px;
+  letter-spacing:1px;
+  color:#000;
+  opacity:0;
+  transition:opacity .2s ease;
+  mix-blend-mode:normal;
+}
+
+.cursor.active + .cursor-text{
+  opacity:1;
+}
+
+.preloader{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  background:#050505;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  animation:preloaderOut 1.4s ease forwards 1.2s;
+}
+
+.preloader span{
+  font-size:10px;
+  letter-spacing:5px;
+  color:#aaa;
+  animation:preloaderText 1s ease forwards;
+}
+
+@keyframes preloaderText{
+  from{opacity:0;letter-spacing:10px}
+  to{opacity:1;letter-spacing:5px}
+}
+
+@keyframes preloaderOut{
+  to{
+    opacity:0;
+    visibility:hidden;
+  }
+}
+
+nav{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:100;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:28px 5vw;
+  mix-blend-mode:normal;
+}
+
+.logo{
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:3px;
+}
+
+.logo span{
+  color:var(--accent);
+}
+
+.nav-links{
+  display:flex;
+  gap:30px;
+  list-style:none;
+}
+
+.nav-links a{
+  color:#aaa;
+  font-size:11px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  transition:.3s;
+}
+
+.nav-links a:hover{
+  color:white;
+}
+
+.nav-menu{
+  display:none;
+  color:white;
+  font-size:11px;
+  letter-spacing:2px;
+}
+
+.hero{
+  min-height:100vh;
+  position:relative;
+  display:flex;
+  align-items:center;
+  padding:0 8vw;
+  overflow:hidden;
+}
+
+.hero::before{
+  content:"";
+  position:absolute;
+  width:70vw;
+  height:70vw;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(100,145,255,.12),transparent 65%);
+  filter:blur(20px);
+  z-index:-2;
+}
+
+.hero-content{
+  max-width:850px;
+  position:relative;
+  z-index:3;
+}
+
+.eyebrow{
+  font-size:10px;
+  letter-spacing:5px;
+  text-transform:uppercase;
+  color:#9ba9c5;
+  margin-bottom:30px;
+  opacity:0;
+  transform:translateY(20px);
+}
+
+.hero h1{
+  font-size:clamp(58px,10vw,150px);
+  line-height:.88;
+  letter-spacing:-8px;
+  font-weight:800;
+  text-transform:uppercase;
+  opacity:0;
+  transform:translateY(50px);
+}
+
+.hero h1 span{
+  display:block;
+  font-family:"Playfair Display",serif;
+  font-style:italic;
+  font-weight:500;
+  text-transform:none;
+  letter-spacing:-5px;
+  color:#b9cfff;
+}
+
+.hero-description{
+  max-width:460px;
+  color:#aaa;
+  line-height:1.8;
+  font-size:14px;
+  margin-top:35px;
+  opacity:0;
+  transform:translateY(25px);
+}
+
+.hero-buttons{
+  display:flex;
+  gap:15px;
+  margin-top:35px;
+  opacity:0;
+  transform:translateY(25px);
+}
+
+.btn{
+  border:1px solid rgba(255,255,255,.25);
+  padding:15px 25px;
+  border-radius:100px;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  transition:.4s;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+}
+
+.btn:hover{
+  background:white;
+  color:black;
+  transform:translateY(-3px);
+}
+
+.btn.primary{
+  background:white;
+  color:black;
+}
+
+.scroll-indicator{
+  position:absolute;
+  bottom:35px;
+  left:8vw;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  color:#777;
+  font-size:9px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+
+.scroll-line{
+  width:50px;
+  height:1px;
+  background:#777;
+  position:relative;
+  overflow:hidden;
+}
+
+.scroll-line::after{
+  content:"";
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:white;
+  transform:translateX(-100%);
+  animation:lineMove 2s infinite;
+}
+
+@keyframes lineMove{
+  0%{transform:translateX(-100%)}
+  50%,100%{transform:translateX(100%)}
+}
+
+section{
+  position:relative;
+}
+
+.section{
+  padding:150px 8vw;
+}
+
+.section-label{
+  font-size:10px;
+  letter-spacing:4px;
+  text-transform:uppercase;
+  color:#73809b;
+  margin-bottom:25px;
+}
+
+.section-title{
+  font-size:clamp(40px,6vw,85px);
+  line-height:1;
+  letter-spacing:-4px;
+  max-width:850px;
+  font-weight:700;
+}
+
+.section-title em{
+  font-family:"Playfair Display",serif;
+  font-weight:500;
+  color:#b9cfff;
+}
+
+.about{
+  min-height:90vh;
+  display:flex;
+  align-items:center;
+}
+
+.about-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:100px;
+  align-items:center;
+}
+
+.about-text{
+  color:#999;
+  line-height:1.9;
+  font-size:15px;
+  max-width:500px;
+}
+
+.about-text strong{
+  color:white;
+}
+
+.about-card{
+  min-height:450px;
+  border:1px solid var(--line);
+  border-radius:30px;
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.015));
+  backdrop-filter:blur(20px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transform-style:preserve-3d;
+}
+
+.about-card::before{
+  content:"";
+  position:absolute;
+  width:280px;
+  height:280px;
+  border-radius:50%;
+  background:radial-gradient(circle,#94baff,transparent 65%);
+  filter:blur(25px);
+  opacity:.25;
+}
+
+.orbit{
+  width:220px;
+  height:220px;
+  border:1px solid rgba(180,210,255,.5);
+  border-radius:50%;
+  position:relative;
+  animation:orbitSpin 12s linear infinite;
+}
+
+.orbit::before,
+.orbit::after{
+  content:"";
+  position:absolute;
+  inset:20px;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:50%;
+}
+
+.orbit::after{
+  inset:-30px;
+  border-style:dashed;
+  opacity:.4;
+}
+
+.orbit-dot{
+  position:absolute;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:white;
+  box-shadow:0 0 30px #a8c9ff;
+  top:-6px;
+  left:50%;
+}
+
+.card-center{
+  position:absolute;
+  text-align:center;
+  z-index:2;
+}
+
+.card-center h3{
+  font-size:35px;
+  letter-spacing:-2px;
+}
+
+.card-center p{
+  color:#888;
+  font-size:10px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  margin-top:10px;
+}
+
+@keyframes orbitSpin{
+  to{transform:rotate(360deg)}
+}
+
+.services{
+  padding-top:100px;
+}
+
+.services-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+  margin-top:70px;
+}
+
+.service-card{
+  min-height:320px;
+  border:1px solid var(--line);
+  border-radius:25px;
+  padding:35px;
+  background:rgba(255,255,255,.035);
+  position:relative;
+  overflow:hidden;
+  transition:.5s;
+}
+
+.service-card:hover{
+  transform:translateY(-12px);
+  background:rgba(255,255,255,.08);
+  border-color:rgba(180,210,255,.5);
+}
+
+.service-number{
+  font-size:11px;
+  color:#6c7890;
+  letter-spacing:2px;
+}
+
+.service-icon{
+  font-size:35px;
+  margin:50px 0 25px;
+  color:#b9cfff;
+}
+
+.service-card h3{
+  font-size:22px;
+  margin-bottom:15px;
+}
+
+.service-card p{
+  color:#888;
+  font-size:13px;
+  line-height:1.8;
+}
+
+.service-card::after{
+  content:"";
+  position:absolute;
+  width:150px;
+  height:150px;
+  right:-70px;
+  bottom:-70px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(130,170,255,.25),transparent 70%);
+}
+
+.work-section{
+  overflow:hidden;
+  padding-top:150px;
+}
+
+.work-heading{
+  padding:0 8vw;
+}
+
+.work-scroll{
+  width:100%;
+  overflow:hidden;
+  margin-top:80px;
+}
+
+.work-track{
+  display:flex;
+  gap:25px;
+  width:max-content;
+  padding:0 8vw 30px;
+}
+
+.project{
+  width:min(70vw,700px);
+  height:500px;
+  flex-shrink:0;
+  border-radius:28px;
+  overflow:hidden;
+  position:relative;
+  border:1px solid rgba(255,255,255,.15);
+  background:#111;
+  transform-style:preserve-3d;
+}
+
+.project-bg{
+  position:absolute;
+  inset:0;
+  transition:transform .7s ease;
+}
+
+.project:hover .project-bg{
+  transform:scale(1.08);
+}
+
+.project:nth-child(1) .project-bg{
+  background:
+  radial-gradient(circle at 75% 25%,#ffcb9a,transparent 20%),
+  linear-gradient(135deg,#1a1110,#8c4d38 50%,#20100d);
+}
+
+.project:nth-child(2) .project-bg{
+  background:
+  radial-gradient(circle at 30% 20%,#ffd6a3,transparent 20%),
+  linear-gradient(135deg,#3c1e11,#d67d37 50%,#28130b);
+}
+
+.project:nth-child(3) .project-bg{
+  background:
+  radial-gradient(circle at 70% 20%,#8abaff,transparent 20%),
+  linear-gradient(135deg,#071021,#274c89 50%,#05070f);
+}
+
+.project:nth-child(4) .project-bg{
+  background:
+  radial-gradient(circle at 50% 30%,#d5c5ff,transparent 20%),
+  linear-gradient(135deg,#170d2a,#6f4da0 50%,#09050f);
+}
+
+.project-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.9),transparent 60%);
+}
+
+.project-content{
+  position:absolute;
+  left:35px;
+  right:35px;
+  bottom:35px;
+  z-index:2;
+}
+
+.project-content small{
+  color:#b9cfff;
+  font-size:10px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+
+.project-content h3{
+  font-size:40px;
+  letter-spacing:-2px;
+  margin:10px 0;
+}
+
+.project-content p{
+  color:#aaa;
+  font-size:12px;
+  max-width:420px;
+  line-height:1.6;
+}
+
+.project-arrow{
+  position:absolute;
+  right:35px;
+  bottom:35px;
+  width:50px;
+  height:50px;
+  border:1px solid rgba(255,255,255,.4);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:.3s;
+}
+
+.project:hover .project-arrow{
+  background:white;
+  color:black;
+}
+
+.marquee{
+  overflow:hidden;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:28px 0;
+  margin-top:100px;
+}
+
+.marquee-inner{
+  display:flex;
+  width:max-content;
+  animation:marquee 25s linear infinite;
+}
+
+.marquee span{
+  font-size:70px;
+  font-weight:800;
+  letter-spacing:-4px;
+  padding-right:50px;
+  color:transparent;
+  -webkit-text-stroke:1px rgba(255,255,255,.35);
+}
+
+.marquee span:nth-child(even){
+  color:#fff;
+  -webkit-text-stroke:0;
+}
+
+@keyframes marquee{
+  to{transform:translateX(-50%)}
+}
+
+.contact{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+}
+
+.contact-wrapper{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:35px;
+  padding:80px;
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+}
+
+.contact-wrapper::before{
+  content:"";
+  position:absolute;
+  width:500px;
+  height:500px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(100,150,255,.2),transparent 65%);
+  top:-300px;
+  right:-150px;
+}
+
+.contact h2{
+  font-size:clamp(45px,7vw,100px);
+  line-height:.95;
+  letter-spacing:-5px;
+  max-width:800px;
+  position:relative;
+}
+
+.contact h2 em{
+  color:#b9cfff;
+  font-family:"Playfair Display",serif;
+  font-weight:500;
+}
+
+.contact-description{
+  color:#999;
+  max-width:450px;
+  line-height:1.8;
+  font-size:14px;
+  margin:35px 0;
+}
+
+.contact-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
+}
+
+.contact-link{
+  border:1px solid var(--line);
+  padding:18px 24px;
+  border-radius:100px;
+  font-size:11px;
+  letter-spacing:1px;
+  transition:.4s;
+}
+
+.contact-link:hover{
+  background:white;
+  color:black;
+  transform:translateY(-4px);
+}
+
+footer{
+  padding:35px 8vw;
+  display:flex;
+  justify-content:space-between;
+  border-top:1px solid var(--line);
+  color:#666;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.reveal{
+  opacity:0;
+  transform:translateY(60px);
+}
+
+@media(max-width:900px){
+  body{
+    cursor:auto;
+  }
+
+  .cursor,
+  .cursor-text{
+    display:none;
+  }
+
+  nav{
+    padding:25px 6vw;
+  }
+
+  .nav-links{
+    display:none;
+  }
+
+  .nav-menu{
+    display:block;
+  }
+
+  .hero{
+    padding:0 7vw;
+  }
+
+  .hero h1{
+    font-size:clamp(55px,15vw,100px);
+    letter-spacing:-5px;
+  }
+
+  .hero h1 span{
+    letter-spacing:-3px;
+  }
+
+  .about-grid{
+    grid-template-columns:1fr;
+    gap:50px;
+  }
+
+  .about-card{
+    min-height:350px;
+  }
+
+  .services-grid{
+    grid-template-columns:1fr;
+  }
+
+  .section{
+    padding:100px 7vw;
+  }
+
+  .section-title{
+    letter-spacing:-2px;
+  }
+
+  .project{
+    width:82vw;
+    height:420px;
+  }
+
+  .project-content h3{
+    font-size:30px;
+  }
+
+  .contact-wrapper{
+    padding:45px 25px;
+  }
+
+  .contact h2{
+    letter-spacing:-3px;
+  }
+
+  footer{
+    padding:30px 7vw;
+    flex-direction:column;
+    gap:15px;
+  }
+}
+
+@media(max-width:500px){
+  .hero-buttons{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .btn{
+    width:max-content;
+  }
+
+  .project{
+    height:380px;
+  }
+
+  .project-content{
+    left:25px;
+    bottom:25px;
+  }
+
+  .project-arrow{
+    right:25px;
+    bottom:25px;
+  }
+
+  .marquee span{
+    font-size:45px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="preloader">
+  <span>ENTERING EXPERIENCE</span>
+</div>
+
+<canvas id="webgl"></canvas>
+<div class="noise"></div>
+
+<div class="cursor"></div>
+<div class="cursor-text">VIEW</div>
+
+<nav>
+  <a href="#home" class="logo">AYUSH<span>.</span></a>
+
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+
+  <div class="nav-menu">MENU</div>
+</nav>
+
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+
+    <div class="hero-content">
+
+      <div class="eyebrow">Independent Digital Creator · India</div>
+
+      <h1>
+        Designing
+        <span>digital worlds.</span>
+      </h1>
+
+      <p class="hero-description">
+        I create visually powerful websites and digital experiences
+        for brands, businesses and people who want to stand apart.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="#work" class="btn primary magnetic">Explore Work →</a>
+        <a href="#contact" class="btn magnetic">Start a Project</a>
+      </div>
+
+    </div>
+
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      Scroll to explore
+    </div>
+
+  </section>
+
+
+  <!-- ABOUT -->
+  <section class="section about" id="about">
+
+    <div class="about-grid">
+
+      <div>
+        <div class="section-label reveal">01 — Identity</div>
+
+        <h2 class="section-title reveal">
+          More than a website.<br>
+          It's an <em>experience.</em>
+        </h2>
+
+        <p class="about-text reveal" style="margin-top:35px;">
+          I'm <strong>Ayush Tripathi</strong>, a creative web designer and
+          digital experience creator. I combine design, animation and
+          technology to build websites that feel modern, memorable and
+          premium.
+          <br><br>
+          My goal is simple: make your business look so good that people
+          remember it after leaving the website.
+        </p>
+      </div>
+
+      <div class="about-card reveal">
+        <div class="orbit">
+          <div class="orbit-dot"></div>
+        </div>
+
+        <div class="card-center">
+          <h3>AYUSH</h3>
+          <p>Creative Digital Studio</p>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- SERVICES -->
+  <section class="section services" id="services">
+
+    <div class="section-label reveal">02 — Capabilities</div>
+
+    <h2 class="section-title reveal">
+      Built for people who<br>
+      <em>think differently.</em>
+    </h2>
+
+    <div class="services-grid">
+
+      <div class="service-card reveal">
+        <div class="service-number">01 / 04</div>
+        <div class="service-icon">✦</div>
+        <h3>Creative Websites</h3>
+        <p>
+          Premium websites with beautiful layouts, strong visual identity
+          and a memorable first impression.
+        </p>
+      </div>
+
+      <div class="service-card reveal">
+        <div class="service-number">02 / 04</div>
+        <div class="service-icon">◈</div>
+        <h3>Animated Experiences</h3>
+        <p>
+          Smooth animations, interactive elements, cinematic transitions
+          and modern motion design.
+        </p>
+      </div>
+
+      <div class="service-card reveal">
+        <div class="service-number">03 / 04</div>
+        <div class="service-icon">⌁</div>
+        <h3>Business Websites</h3>
+        <p>
+          Professional websites for shops, restaurants, startups, agencies
+          and local businesses.
+        </p>
+      </div>
+
+      <div class="service-card reveal">
+        <div class="service-number">04 / 04</div>
+        <div class="service-icon">◎</div>
+        <h3>Brand Presence</h3>
+        <p>
+          Digital identity, landing pages and visual systems designed to
+          make brands look trustworthy and modern.
+        </p>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- WORK -->
+  <section class="work-section" id="work">
+
+    <div class="work-heading">
+
+      <div class="section-label reveal">03 — Selected Work</div>
+
+      <h2 class="section-title reveal">
+        A few things<br>
+        I've <em>built.</em>
+      </h2>
+
+    </div>
+
+    <div class="work-scroll">
+
+      <div class="work-track">
+
+        <article class="project magnetic-card reveal">
+          <div class="project-bg"></div>
+          <div class="project-overlay"></div>
+
+          <div class="project-content">
+            <small>Pet Care · Business Website</small>
+            <h3>Pet Shop</h3>
+            <p>
+              A warm, modern and trustworthy digital experience for a
+              professional pet care business.
+            </p>
+          </div>
+
+          <div class="project-arrow">↗</div>
+        </article>
+
+
+        <article class="project magnetic-card reveal">
+          <div class="project-bg"></div>
+          <div class="project-overlay"></div>
+
+          <div class="project-content">
+            <small>Food · Bakery Website</small>
+            <h3>Sweet Bakery</h3>
+            <p>
+              A delicious visual identity with elegant sections,
+              product presentation and customer-focused design.
+            </p>
+          </div>
+
+          <div class="project-arrow">↗</div>
+        </article>
+
+
+        <article class="project magnetic-card reveal">
+          <div class="project-bg"></div>
+          <div class="project-overlay"></div>
+
+          <div class="project-content">
+            <small>Business · Digital Presence</small>
+            <h3>Modern Business</h3>
+            <p>
+              A conversion-focused website designed to make a business
+              look established, professional and premium.
+            </p>
+          </div>
+
+          <div class="project-arrow">↗</div>
+        </article>
+
+
+        <article class="project magnetic-card reveal">
+          <div class="project-bg"></div>
+          <div class="project-overlay"></div>
+
+          <div class="project-content">
+            <small>Future · Creative Project</small>
+            <h3>Next Chapter</h3>
+            <p>
+              More creative websites, experiments and digital worlds are
+              coming soon.
+            </p>
+          </div>
+
+          <div class="project-arrow">↗</div>
+        </article>
+
+      </div>
+
+    </div>
+
+    <div class="marquee">
+      <div class="marquee-inner">
+        <span>DESIGN · DEVELOP · DELIVER · </span>
+        <span>DESIGN · DEVELOP · DELIVER · </span>
+        <span>DESIGN · DEVELOP · DELIVER · </span>
+        <span>DESIGN · DEVELOP · DELIVER · </span>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- CONTACT -->
+  <section class="section contact" id="contact">
+
+    <div class="contact-wrapper reveal">
+
+      <div class="section-label">04 — Contact</div>
+
+      <h2>
+        Have an idea?<br>
+        Let's make it <em>real.</em>
+      </h2>
+
+      <p class="contact-description">
+        Tell me about your business, project or idea. Let's create
+        something that looks different and feels unforgettable.
+      </p>
+
+      <div class="contact-links">
+
+        <!-- अपना नंबर बदलें -->
+        <a class="contact-link magnetic" href="https://wa.me/919999999999" target="_blank">
+          WhatsApp ↗
+        </a>
+
+        <!-- अपना नंबर बदलें -->
+        <a class="contact-link magnetic" href="tel:+919999999999">
+          Call Me ↗
+        </a>
+
+        <!-- अपनी ईमेल बदलें -->
+        <a class="contact-link magnetic" href="mailto:yourmail@example.com">
+          Email Me ↗
+        </a>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<footer>
+  <span>© 2026 Ayush Tripathi</span>
+  <span>Made with imagination & code</span>
+</footer>
+
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+
+/* =========================
+   HERO INTRO ANIMATION
+========================= */
+
+window.addEventListener("load", () => {
+
+  const tl = gsap.timeline();
+
+  tl.to(".preloader", {
+    opacity:0,
+    duration:.8,
+    delay:.4,
+    onComplete:()=>{
+      document.querySelector(".preloader").style.display="none";
+    }
+  })
+
+  .to(".eyebrow", {
+    opacity:1,
+    y:0,
+    duration:1,
+    ease:"power3.out"
+  })
+
+  .to(".hero h1", {
+    opacity:1,
+    y:0,
+    duration:1.2,
+    ease:"power4.out"
+  }, "-=.7")
+
+  .to(".hero-description", {
+    opacity:1,
+    y:0,
+    duration:.8,
+    ease:"power3.out"
+  }, "-=.7")
+
+  .to(".hero-buttons", {
+    opacity:1,
+    y:0,
+    duration:.8,
+    ease:"power3.out"
+  }, "-=.5");
+
+});
+
+
+/* =========================
+   CUSTOM CURSOR
+========================= */
+
+const cursor = document.querySelector(".cursor");
+const cursorText = document.querySelector(".cursor-text");
+
+let mouseX = 0;
+let mouseY = 0;
+let currentX = 0;
+let currentY = 0;
+
+window.addEventListener("mousemove", e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+function animateCursor(){
+  currentX += (mouseX-currentX)*.16;
+  currentY += (mouseY-currentY)*.16;
+
+  cursor.style.left = currentX+"px";
+  cursor.style.top = currentY+"px";
+
+  cursorText.style.left = currentX+"px";
+  cursorText.style.top = currentY+"px";
+
+  requestAnimationFrame(animateCursor);
+}
+
+animateCursor();
+
+
+document.querySelectorAll("a,button,.magnetic-card").forEach(el => {
+
+  el.addEventListener("mouseenter", () => {
+    cursor.classList.add("active");
+  });
+
+  el.addEventListener("mouseleave", () => {
+    cursor.classList.remove("active");
+  });
+
+});
+
+
+/* =========================
+   MAGNETIC BUTTONS
+========================= */
+
+document.querySelectorAll(".magnetic").forEach(item => {
+
+  item.addEventListener("mousemove", function(e){
+
+    const rect = this.getBoundingClientRect();
+
+    const x = e.clientX - rect.left - rect.width/2;
+    const y = e.clientY - rect.top - rect.height/2;
+
+    gsap.to(this,{
+      x:x*.18,
+      y:y*.18,
+      duration:.3,
+      ease:"power2.out"
+    });
+
+  });
+
+  item.addEventListener("mouseleave", function(){
+
+    gsap.to(this,{
+      x:0,
+      y:0,
+      duration:.5,
+      ease:"elastic.out(1,.4)"
+    });
+
+  });
+
+});
+
+
+/* =========================
+   REVEAL ANIMATIONS
+========================= */
+
+gsap.utils.toArray(".reveal").forEach((element) => {
+
+  gsap.fromTo(element,
+    {
+      opacity:0,
+      y:70
+    },
+    {
+      opacity:1,
+      y:0,
+      duration:1.1,
+      ease:"power3.out",
+      scrollTrigger:{
+        trigger:element,
+        start:"top 85%",
+        toggleActions:"play none none reverse"
+      }
+    }
+  );
+
+});
+
+
+/* =========================
+   HORIZONTAL PROJECT SCROLL
+========================= */
+
+const track = document.querySelector(".work-track");
+
+function horizontalScroll(){
+
+  if(window.innerWidth <= 900) return;
+
+  const distance = track.scrollWidth - window.innerWidth + window.innerWidth*.16;
+
+  gsap.to(track,{
+    x:-distance,
+    ease:"none",
+    scrollTrigger:{
+      trigger:".work-scroll",
+      start:"top top",
+      end:()=>"+="+distance,
+      scrub:1,
+      pin:true,
+      invalidateOnRefresh:true
+    }
+  });
+
+}
+
+horizontalScroll();
+
+
+/* =========================
+   PROJECT TILT
+========================= */
+
+document.querySelectorAll(".magnetic-card").forEach(card => {
+
+  card.addEventListener("mousemove", e => {
+
+    const rect = card.getBoundingClientRect();
+
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const rotateX = ((y / rect.height)-.5) * -8;
+    const rotateY = ((x / rect.width)-.5) * 8;
+
+    gsap.to(card,{
+      rotateX,
+      rotateY,
+      duration:.5,
+      ease:"power2.out",
+      transformPerspective:1000
+    });
+
+  });
+
+  card.addEventListener("mouseleave", () => {
+
+    gsap.to(card,{
+      rotateX:0,
+      rotateY:0,
+      duration:.7,
+      ease:"power3.out"
+    });
+
+  });
+
+});
+
+
+/* =========================
+   THREE.JS 3D SCENE
+========================= */
+
+const canvas = document.getElementById("webgl");
+
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+  55,
+  window.innerWidth/window.innerHeight,
+  .1,
+  100
+);
+
+camera.position.set(0,0,7);
+
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  antialias:true,
+  alpha:true
+});
+
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(window.innerWidth,window.innerHeight);
+
+renderer.outputEncoding = THREE.sRGBEncoding;
+
+const group = new THREE.Group();
+scene.add(group);
+
+
+/* LIGHTS */
+
+const ambient = new THREE.AmbientLight(0xffffff,.4);
+scene.add(ambient);
+
+const pointLight = new THREE.PointLight(0x8abaff,3,15);
+pointLight.position.set(3,3,4);
+scene.add(pointLight);
+
+const pointLight2 = new THREE.PointLight(0xffffff,2,15);
+pointLight2.position.set(-4,-2,3);
+scene.add(pointLight2);
+
+
+/* MAIN GLASS OBJECT */
+
+const geometry = new THREE.IcosahedronGeometry(1.65,2);
+
+const material = new THREE.MeshPhysicalMaterial({
+  color:0x8fb7ff,
+  metalness:.35,
+  roughness:.15,
+  transparent:true,
+  opacity:.18,
+  transmission:.4,
+  clearcoat:1,
+  clearcoatRoughness:.1,
+  wireframe:false
+});
+
+const crystal = new THREE.Mesh(geometry,material);
+group.add(crystal);
+
+
+/* WIREFRAME OUTLINE */
+
+const wireGeometry = new THREE.IcosahedronGeometry(1.72,2);
+
+const wireMaterial = new THREE.MeshBasicMaterial({
+  color:0xb9d7ff,
+  wireframe:true,
+  transparent:true,
+  opacity:.35
+});
+
+const wire = new THREE.Mesh(wireGeometry,wireMaterial);
+group.add(wire);
+
+
+/* INNER SPHERE */
+
+const innerGeometry = new THREE.SphereGeometry(.75,32,32);
+
+const innerMaterial = new THREE.MeshStandardMaterial({
+  color:0x7faaff,
+  emissive:0x4777d8,
+  emissiveIntensity:1.5,
+  transparent:true,
+  opacity:.35
+});
+
+const inner = new THREE.Mesh(innerGeometry,innerMaterial);
+group.add(inner);
+
+
+/* RINGS */
+
+const ring1 = new THREE.Mesh(
+  new THREE.TorusGeometry(2.15,.008,16,160),
+  new THREE.MeshBasicMaterial({
+    color:0xaacbff,
+    transparent:true,
+    opacity:.4
+  })
+);
+
+ring1.rotation.x = Math.PI/2.5;
+group.add(ring1);
+
+const ring2 = new THREE.Mesh(
+  new THREE.TorusGeometry(2.5,.006,16,160),
+  new THREE.MeshBasicMaterial({
+    color:0xffffff,
+    transparent:true,
+    opacity:.18
+  })
+);
+
+ring2.rotation.y = Math.PI/3;
+group.add(ring2);
+
+
+/* PARTICLES */
+
+const particleCount = 900;
+const particleGeometry = new THREE.BufferGeometry();
+
+const positions = new Float32Array(particleCount*3);
+
+for(let i=0;i<particleCount;i++){
+
+  const radius = 5 + Math.random()*8;
+  const angle = Math.random()*Math.PI*2;
+  const height = (Math.random()-.5)*12;
+
+  positions[i*3] = Math.cos(angle)*radius;
+  positions[i*3+1] = height;
+  positions[i*3+2] = Math.sin(angle)*radius;
+
+}
+
+particleGeometry.setAttribute(
+  "position",
+  new THREE.BufferAttribute(positions,3)
+);
+
+const particleMaterial = new THREE.PointsMaterial({
+  color:0x9cbfff,
+  size:.018,
+  transparent:true,
+  opacity:.55
+});
+
+const particles = new THREE.Points(
+  particleGeometry,
+  particleMaterial
+);
+
+scene.add(particles);
+
+
+/* MOUSE MOVEMENT */
+
+let targetRotX = 0;
+let targetRotY = 0;
+
+window.addEventListener("mousemove", e => {
+
+  targetRotY = (e.clientX/window.innerWidth-.5)*.35;
+  targetRotX = (e.clientY/window.innerHeight-.5)*.2;
+
+});
+
+
+/* ANIMATION LOOP */
+
+function animate(){
+
+  requestAnimationFrame(animate);
+
+  crystal.rotation.x += .002;
+  crystal.rotation.y += .004;
+
+  wire.rotation.x -= .001;
+  wire.rotation.y -= .002;
+
+  inner.rotation.y += .008;
+
+  ring1.rotation.z += .002;
+  ring2.rotation.x += .0015;
+
+  particles.rotation.y += .0003;
+
+  group.rotation.y += (targetRotY-group.rotation.y)*.025;
+  group.rotation.x += (targetRotX-group.rotation.x)*.025;
+
+  renderer.render(scene,camera);
+
+}
+
+animate();
+
+
+/* =========================
+   THREE.JS SCROLL MOTION
+========================= */
+
+gsap.to(group.rotation,{
+  x:1.2,
+  y:4,
+  scrollTrigger:{
+    trigger:".about",
+    start:"top bottom",
+    end:"bottom top",
+    scrub:2
+  }
+});
+
+gsap.to(group.position,{
+  x:2,
+  y:-.5,
+  scrollTrigger:{
+    trigger:".about",
+    start:"top bottom",
+    end:"bottom top",
+    scrub:2
+  }
+});
+
+gsap.to(group.scale,{
+  x:.65,
+  y:.65,
+  z:.65,
+  scrollTrigger:{
+    trigger:".services",
+    start:"top bottom",
+    end:"bottom top",
+    scrub:2
+  }
+});
+
+gsap.to(group.position,{
+  x:-2,
+  y:1,
+  scrollTrigger:{
+    trigger:".work-section",
+    start:"top bottom",
+    end:"bottom top",
+    scrub:2
+  }
+});
+
+gsap.to(group.scale,{
+  x:.9,
+  y:.9,
+  z:.9,
+  scrollTrigger:{
+    trigger:".contact",
+    start:"top bottom",
+    end:"bottom top",
+    scrub:2
+  }
+});
+
+
+/* =========================
+   WINDOW RESIZE
+========================= */
+
+window.addEventListener("resize",()=>{
+
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+
+  ScrollTrigger.refresh();
+
+});
+
+
+/* =========================
+   SMOOTH SCROLL FEEL
+========================= */
+
+let lastScroll = 0;
+
+window.addEventListener("scroll",()=>{
+
+  const currentScroll = window.scrollY;
+  const velocity = currentScroll-lastScroll;
+
+  particles.rotation.x += velocity*.0001;
+
+  lastScroll = currentScroll;
+
+});
+
+
+/* =========================
+   NAV ACTIVE COLOR
+========================= */
+
+const sections = document.querySelectorAll("section");
+const navLinks = document.querySelectorAll(".nav-links a");
+
+window.addEventListener("scroll",()=>{
+
+  let current = "";
+
+  sections.forEach(section=>{
+
+    const sectionTop = section.offsetTop-250;
+
+    if(window.scrollY>=sectionTop){
+      current=section.getAttribute("id");
+    }
+
+  });
+
+  navLinks.forEach(link=>{
+
+    link.style.color = "#aaa";
+
+    if(link.getAttribute("href")==="#"+current){
+      link.style.color="#fff";
+    }
+
+  });
+
+});
+
+
+/* =========================
+   MOBILE MENU
+========================= */
+
+document.querySelector(".nav-menu").addEventListener("click",()=>{
+
+  const links = document.querySelector(".nav-links");
+
+  if(links.style.display==="flex"){
+    links.style.display="none";
+  }else{
+    links.style.display="flex";
+    links.style.position="fixed";
+    links.style.top="75px";
+    links.style.right="6vw";
+    links.style.flexDirection="column";
+    links.style.background="rgba(10,10,10,.95)";
+    links.style.padding="25px";
+    links.style.border="1px solid rgba(255,255,255,.15)";
+    links.style.borderRadius="15px";
+  }
+
+});
+</script>
+
+</body>
+</html>
